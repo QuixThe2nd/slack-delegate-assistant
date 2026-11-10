@@ -1,0 +1,6 @@
+{
+  "name": "slack-delegate-assistant",
+  "version": "0.1.0",
+  "description": "Send one Slack notification with delegate_assistant",
+  "mcpServers": "./.mcp.json"
+}

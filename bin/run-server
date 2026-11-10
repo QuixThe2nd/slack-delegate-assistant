@@ -1,0 +1,42 @@
+#!/bin/sh
+# Start the stdio MCP server with a Python that can import mcp.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+if [ -n "${PLUGIN_ROOT:-}" ]; then
+  ROOT=$PLUGIN_ROOT
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  ROOT=$CLAUDE_PLUGIN_ROOT
+fi
+cd "$ROOT"
+if [ -z "${SLACK_BOT_TOKEN:-}" ]; then
+  SECRETS="${SLACK_DELEGATE_ENV:-$HOME/.hermes/secrets/slack-delegate.env}"
+  if [ -f "$SECRETS" ]; then
+    SLACK_BOT_TOKEN=$(python3 - "$SECRETS" <<'PY'
+import pathlib, sys
+for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    if line.startswith("SLACK_BOT_TOKEN="):
+        value = line.split("=", 1)[1].strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        sys.stdout.write(value)
+        break
+PY
+)
+    export SLACK_BOT_TOKEN
+  fi
+fi
+if [ -z "${WINNIE_HOST:-}" ]; then
+  if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    export WINNIE_HOST=claude
+  elif [ -n "${PLUGIN_ROOT:-}" ]; then
+    export WINNIE_HOST=codex
+  fi
+fi
+SERVER="$ROOT/server/slack_delegate_mcp.py"
+if [ -x "$ROOT/.venv/bin/python" ] && "$ROOT/.venv/bin/python" -c 'import mcp' >/dev/null 2>&1; then
+  exec "$ROOT/.venv/bin/python" -u "$SERVER"
+fi
+if command -v uv >/dev/null 2>&1; then
+  exec uv run --project "$ROOT" python -u "$SERVER"
+fi
+exec python3 -u "$SERVER"

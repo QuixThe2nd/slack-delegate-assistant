@@ -1,0 +1,20 @@
+{
+  "name": "slack-delegate-local",
+  "interface": {
+    "displayName": "Slack Delegate Assistant (Local)"
+  },
+  "plugins": [
+    {
+      "name": "slack-delegate-assistant",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

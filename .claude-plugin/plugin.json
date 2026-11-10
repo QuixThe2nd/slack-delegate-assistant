@@ -1,0 +1,8 @@
+{
+  "name": "slack-delegate-assistant",
+  "description": "Send one Slack notification with delegate_assistant",
+  "version": "0.1.0",
+  "author": {
+    "name": "Parsa"
+  }
+}
